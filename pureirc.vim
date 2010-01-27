@@ -1,7 +1,7 @@
 "=============================================================================
 " File: pureirc.vim
 " Author: Yasuhiro Matsumoto <mattn.jp@gmail.com>
-" Last Change: 27-Jan-2010.
+" Last Change: 28-Jan-2010.
 " Version: 0.1
 " WebPage: http://github.com/mattn/pureirc-vim
 " Usage:
@@ -131,19 +131,8 @@ function! s:get_json(url, param)
   return eval(str)
 endfunction
 
-function! IrcRecvNotify(sid, room, nick, msg)
-  let tmp = substitute(a:sid, ' ', '', 'g')
-  if len(tmp) > 0
-    let s:IrcSid = tmp
-  endif
-  let tmp = substitute(a:room, ' ', '', 'g')
-  if len(tmp) > 0
-    let s:IrcRoom = tmp
-  endif
-  let tmp = substitute(a:nick, ' ', '', 'g')
-  if len(tmp) > 0
-    let s:IrcNick = tmp
-  endif
+function! IrcRecvNotify(ctx, nick, msg)
+  let s:IrcCtx = a:ctx
   let winnr = bufwinnr("__PUREIRC__")
   if winnr > 0
     if winnr != winnr()
@@ -164,11 +153,11 @@ function! IrcRecvNotify(sid, room, nick, msg)
   return 1
 endfunction
 
-function! IrcSendNotify(sid, room, nick, msg)
+function! IrcSendNotify(ctx, nick, msg)
   let list = serverlist()
   for s in split(list)
     try
-      call remote_expr(s, "IrcRecvNotify(".string(a:sid).",".string(a:room).",".string(a:nick).",".string(a:msg).")")
+      call remote_expr(s, "IrcRecvNotify(".string(a:ctx).",".string(a:nick).",".string(a:msg).")")
     catch /^Vim\%((\a\+)\)\=:E449/
     endtry
   endfor
@@ -181,9 +170,9 @@ function! IrcSendMessage(msg)
     setlocal buftype=nofile bufhidden=hide noswapfile wrap ft= nonumber modifiable
     syntax match SpecialKey /^<\(@[^>]\+\)>/
   endif
-  if exists("s:IrcSid") && len(a:msg)
-    call s:get_json("http://webchat.freenode.net/e/p", {"s" : s:IrcSid, "c" : "PRIVMSG ".s:IrcRoom." :".a:msg})
-	call IrcRecvNotify(s:IrcSid, s:IrcRoom, s:IrcNick, a:msg)
+  if exists("s:IrcCtx") && len(a:msg)
+    call s:get_json("http://webchat.freenode.net/e/p", {"s" : s:IrcCtx['s'], "c" : "PRIVMSG ".s:IrcCtx['r']." :".a:msg})
+	call IrcRecvNotify(s:IrcCtx, s:IrcCtx['n'], a:msg)
   endif
 endfunction
 
@@ -201,7 +190,7 @@ function! IrcServer(room, nick)
       if i[0] != "c"
         continue
       endif
-      call IrcSendNotify(sid, '', '', string(i[3][1]))
+      call IrcSendNotify({'s' : sid, 'r' : '', 'n' : ''}, '', string(i[3][1]))
       if i[1] == "433"
         let nick = nick . "_"
         break
@@ -225,7 +214,7 @@ function! IrcServer(room, nick)
         continue
       endif
 	  if type(i[3]) == 3 && len(i[3]) > 1
-        call IrcSendNotify(sid, a:room, substitute(i[2], '!.*', '', ''), i[3][1])
+        call IrcSendNotify({'s' : sid, 'r' : a:room, 'n' : nick}, substitute(i[2], '!.*', '', ''), string(i[3][1]))
       endif
     endfor
   endwhile
