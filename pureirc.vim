@@ -6,10 +6,12 @@
 " WebPage: http://github.com/mattn/pureirc-vim
 " Usage:
 "
-"   1. open terminal window and start vim
-"   2. :IrcServer #vim mynick
-"   3. open new termianl and start vim
-"   4. :Irc hello!
+"   1. Open terminal window and start vim
+"   3. Open new termianl and start vim
+"   2. Type following on one of vim
+"        :IrcServer #vim mynick
+"   4. Type following on another vim
+"        :Irc hello!
 "
 
 let g:pureirc_vim_version = "0.1"
