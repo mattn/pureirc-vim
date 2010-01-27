@@ -3,7 +3,7 @@
 " Author: Yasuhiro Matsumoto <mattn.jp@gmail.com>
 " Last Change: 27-Jan-2010.
 " Version: 0.1
-" WebPage: http://github.com/mattn/pureirc-vim/tree/master
+" WebPage: http://github.com/mattn/pureirc-vim
 " Usage:
 "
 "   1. open terminal window and start vim
